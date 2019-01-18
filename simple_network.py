@@ -1,7 +1,8 @@
 import numpy
-from nn import activation, conv2d, dense, reshape
+import pickle
+from nn import network, activation, conv2d, dense, reshape
 
-class SimpleNetwork:
+class SimpleNetwork(network.Network):
 
     def __init__(self, learning_rate=0.1):
         self.layer1 = dense.Dense(2, 10, activation.Relu(), learning_rate)

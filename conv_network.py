@@ -1,7 +1,8 @@
 import numpy
-from nn import activation, conv2d, dense, reshape, maxpool2d, relu_layer
+import pickle
+from nn import network, activation, conv2d, dense, reshape, maxpool2d, relu_layer
 
-class ConvNetwork:
+class ConvNetwork(network.Network):
 
     def __init__(self, image_channels, image_size, filter_count, filter_size, output_features, learning_rate=0.1):
         conv_input_size = (image_channels, image_size[0], image_size[1])
@@ -75,4 +76,16 @@ class ConvNetwork:
         self.layer2.print_weights()
         self.layer1.print_weights()
         print("</conv_network>")
+    
+    def save(self, filename):
+        f = open(filename,'wb') 
+        pickle.dump(self, f)
+        f.close()
+
+    @staticmethod
+    def open(filename):
+        f = open(filename, 'r')  
+        network = pickle.load(f)
+        f.close()
         
+        return network

@@ -11,6 +11,7 @@ CONV_FILTER_SIZE = (3, 3)
 OUTPUT_FEATURES = 10
 LEARNING_RATE = 0.1
 BATCH_SIZE = 250
+NETWORK_FILENAME = 'conv_test.net'
 
 network = ConvNetwork(IMAGE_CHANNELS, IMAGE_SIZE, CONV_FILTER_COUNT, CONV_FILTER_SIZE, OUTPUT_FEATURES, LEARNING_RATE)
 criterion = error.MSE()
@@ -86,5 +87,6 @@ for epoch in range(EPOCH_COUNT):
     validation_error = validation_error/len(validation_set)
     validation_acc = validation_correct/len(validation_set)
 
+    network.save(NETWORK_FILENAME)
     print("Epoch: %i Training Error: %.6f Validation Error: %.6f Validation Acc: %.6f" % (epoch, training_error, validation_error, validation_acc))
 
