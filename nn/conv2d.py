@@ -5,14 +5,19 @@ class Conv2D:
 
     #input_size = (channels, height, width)
     #kernel_size = (num_filters, height, width)
-    def __init__(self, input_size=(1, 28, 28), kernel_size=(3, 5, 5), learning_rate=0.1, stride=1, padding=0):
-        self.learning_rate =learning_rate
+    def __init__(self, input_size=(1, 28, 28), kernel_size=(3, 5, 5), learning_rate=0.1, momentum=0.5, stride=1, padding=0):
+        self.learning_rate = learning_rate
+        self.momentum = momentum
         self.stride = stride
         self.padding = padding
         self.input_size = input_size
         self.kernel_size = kernel_size
         self.kernel = numpy.random.uniform(-1, 1, kernel_size)
-        self.biases = numpy.random.uniform(-1, 1, kernel_size[0])
+        self.bias = numpy.random.uniform(-1, 1, kernel_size[0])
+
+        self.prev_input = None
+        self.prev_weight_error = 0
+        self.prev_bias_error = 0
 
         out_f = kernel_size[0]
         out_c = input_size[0]
@@ -34,7 +39,7 @@ class Conv2D:
         #iterate over each filter
         for f in range(num_filters):
             filter = self.kernel[f]
-            bias = self.biases[f]
+            bias = self.bias[f]
 
             #iterate over input channels
             for in_c in range(num_channels):
@@ -119,23 +124,22 @@ class Conv2D:
         #Back propogate the error for our inputs
         return input_error
 
-        
-
-
     def update_weights(self):
         if len(self.w_error_history) > 0:
             #dw = LR * dC/w
             #This is a vector of changes to be made to each weight scaled by
             #our learning rate.
-            dw = self.learning_rate * numpy.mean(self.w_error_history, axis=0)
-            self.kernel = self.kernel - dw
+            weight_error = (self.momentum * self.prev_weight_error) + numpy.mean(self.w_error_history, axis=0)
+            self.kernel = self.kernel - (self.learning_rate * weight_error)
+            self.prev_weight_error = weight_error
         
         if len(self.b_error_history) > 0:
             #db = LR * dC/b
             #This is a vector of changes to be made to each bias scaled by
             #our learning rate.
-            db = self.learning_rate * numpy.mean(self.b_error_history, axis=0)
-            self.biases = self.biases - db
+            bias_error = (self.momentum * self.prev_bias_error) + numpy.mean(self.b_error_history, axis=0)
+            self.bias = self.bias - (self.learning_rate * bias_error)
+            self.prev_bias_error = bias_error
 
         self.clear_gradients()
     

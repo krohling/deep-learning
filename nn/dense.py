@@ -3,14 +3,17 @@ import math
 
 class Dense:
 
-    def __init__(self, in_features, out_features, activation, learning_rate = 0.1, weights=None, bias=None):
+    def __init__(self, in_features, out_features, activation, learning_rate=0.1, momentum=0.5, weights=None, bias=None):
         self.learning_rate = learning_rate
+        self.momentum = momentum
         self.activation_fx = numpy.vectorize(activation.fx)
         self.activation_dfx = numpy.vectorize(activation.dfx)
 
         self.clear_gradients()
         self.prev_weighted_sum = 0
         self.prev_activation_dfx = 0
+        self.prev_weight_error = 0
+        self.prev_bias_error = 0
 
         if weights is None:
             self.weights = numpy.random.uniform(-1, 1, (out_features, in_features))
@@ -61,15 +64,17 @@ class Dense:
             #dw = LR * dC/w
             #This is a vector of changes to be made to each weight scaled by
             #our learning rate.
-            dw = self.learning_rate * numpy.mean(self.w_error_history, axis=0)
-            self.weights = self.weights - dw
+            weight_error = (self.momentum * self.prev_weight_error) + numpy.mean(self.w_error_history, axis=0)
+            self.weights = self.weights - (self.learning_rate * weight_error)
+            self.prev_weight_error = weight_error
         
         if len(self.b_error_history) > 0:
             #db = LR * dC/b
             #This is a vector of changes to be made to each bias scaled by
             #our learning rate.
-            db = self.learning_rate * numpy.mean(self.b_error_history, axis=0)
-            self.bias = self.bias - db
+            bias_error = (self.momentum * self.prev_bias_error) + numpy.mean(self.b_error_history, axis=0)
+            self.bias = self.bias - (self.learning_rate * bias_error)
+            self.prev_bias_error = bias_error
         
         self.clear_gradients()
     

@@ -4,17 +4,17 @@ from nn import network, activation, conv2d, dense, reshape, maxpool2d, relu_laye
 
 class ConvNetwork(network.Network):
 
-    def __init__(self, image_channels, image_size, filter_count, filter_size, output_features, learning_rate=0.1):
+    def __init__(self, image_channels, image_size, filter_count, filter_size, output_features, learning_rate=0.1, momentum=0.5):
         conv_input_size = (image_channels, image_size[0], image_size[1])
         conv_filter_size = (filter_count, filter_size[0], filter_size[1])
 
-        self.layer1 = conv2d.Conv2D(conv_input_size, conv_filter_size, learning_rate)
+        self.layer1 = conv2d.Conv2D(conv_input_size, conv_filter_size, learning_rate, momentum)
         self.layer2 = relu_layer.ReluLayer()
         layer3_input_size = (self.layer1.output_size[0]*self.layer1.output_size[1], self.layer1.output_size[2], self.layer1.output_size[3])
         self.layer3 = reshape.Reshape(self.layer1.output_size, layer3_input_size)
         self.layer4 = maxpool2d.MaxPool2D(layer3_input_size, (3, 3))
 
-        self.layer5 = conv2d.Conv2D(self.layer4.output_size, conv_filter_size, learning_rate)
+        self.layer5 = conv2d.Conv2D(self.layer4.output_size, conv_filter_size, learning_rate, momentum)
         self.layer6 = relu_layer.ReluLayer()
         layer5_input_size = (self.layer5.output_size[0]*self.layer5.output_size[1], self.layer5.output_size[2], self.layer5.output_size[3])
         self.layer7 = reshape.Reshape(self.layer5.output_size, layer5_input_size)
@@ -24,7 +24,7 @@ class ConvNetwork(network.Network):
         dense_input_size = self.layer8.output_size[0]*self.layer8.output_size[1]*self.layer8.output_size[2]
         self.layer9 = reshape.Reshape(self.layer8.output_size, dense_input_size)
 
-        self.layer10 = dense.Dense(dense_input_size, output_features, activation.Sigmoid(), learning_rate)
+        self.layer10 = dense.Dense(dense_input_size, output_features, activation.Sigmoid(), learning_rate, momentum)
     
     def forward(self, input):
         x = self.layer1.forward(input)
